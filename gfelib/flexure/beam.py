@@ -10,10 +10,8 @@ def beam(
     thicken: bool = False,
     thick_ratio: float = 0,
     thick_width: float = 0,
-    geometry_layer: gf.typings.LayerSpec = 0,
-    release_layer: gf.typings.LayerSpec = 1,
-    release_hole_radius: float = 0,
-    release_distance: float = 1,
+    layer: gf.typings.LayerSpec = 0,
+    **kwargs,
 ) -> gf.Component:
     """Returns a beam with optional thickened part with release holes
 
@@ -25,12 +23,17 @@ def beam(
         release_distance: maximum distance between adjacent release holes
         release_layer: layer to place release holes
     """
+
+    release_hole_radius: float = kwargs.get("release_hole_radius", 0)
+    release_distance: float = kwargs.get("release_distance", 1)
+    release_layer: gf.typings.LayerSpec = kwargs.get("release_layer", 1)
+
     c = gf.Component()
 
     if not thicken:
         c << gf.components.rectangle(
             size=(length, width),
-            layer=geometry_layer,
+            layer=layer,
             centered=True,
         )
         return c
@@ -41,7 +44,7 @@ def beam(
     # Emit thickened rectangle
     c << rectangle(
         size=(thick_len, thick_width),
-        geometry_layer=geometry_layer,
+        geometry_layer=layer,
         centered=True,
         release_hole_radius=release_hole_radius,
         release_distance=release_distance,
@@ -49,17 +52,11 @@ def beam(
     )
     # Emit thin sections
     (
-        c
-        << gf.components.rectangle(
-            size=(thin_len, width), layer=geometry_layer, centered=True
-        )
+        c << gf.components.rectangle(size=(thin_len, width), layer=layer, centered=True)
     ).move((thin_center, 0))
 
     (
-        c
-        << gf.components.rectangle(
-            size=(thin_len, width), layer=geometry_layer, centered=True
-        )
+        c << gf.components.rectangle(size=(thin_len, width), layer=layer, centered=True)
     ).move((-thin_center, 0))
 
     c.flatten()

@@ -13,12 +13,8 @@ def butterfly_half(
     thicken: bool = False,
     thick_ratio: float = 0,
     thick_width: float = 0,
-    release_hole_on_inner_carriage: bool = True,
-    angle_resolution: float = 1,
-    geometry_layer: gf.typings.LayerSpec = 0,
-    release_hole_radius: float = 0,
-    release_distance: float = 1,
-    release_layer: gf.typings.LayerSpec = 1,
+    layer: gf.typings.LayerSpec = 0,
+    **kwargs,
 ) -> gf.Component:
     """Returns a half-butterfly joint (4 beams)
 
@@ -31,12 +27,20 @@ def butterfly_half(
         thicken: whether to thicken middle part of beam
         thick_ratio: ratio of thickened part
         thick_width: width of thickened part
-        release_hole_on_inner_carriage: whether to hollow the inner intermediate stage
         geometry_layer: layer to place device
         release_hole_radius: radius of the release holes
         release_distance: maximum distance between adjacent release holes
         release_layer: layer to place release holes
+
+    Keyword Args:
+        hollow_inner: whether to put release holes on the inner intermediate stage (False)
     """
+    hollow_inner: bool = kwargs.get("hollow_inner", False)
+    release_hole_radius: float = kwargs.get("release_hole_radius", 0)
+    release_distance: float = kwargs.get("release_distance", 1)
+    release_layer: gf.typings.LayerSpec = kwargs.get("release_layer", 1)
+    angle_resolution: float = kwargs.get("angle_resolution", 1)
+
     c = gf.Component()
 
     angles = sorted(angles)
@@ -47,12 +51,12 @@ def butterfly_half(
         np.pi / 180
     )
     end_angle = 180 - start_angle
-    if release_hole_on_inner_carriage:
+    if hollow_inner:
         ref = c << released.ring(
             radius=rmid_inner,
             width=width_inner,
             angle=end_angle - start_angle,
-            geometry_layer=geometry_layer,
+            geometry_layer=layer,
             release_distance=release_distance,
             release_hole_radius=release_hole_radius,
             release_layer=release_layer,
@@ -63,7 +67,7 @@ def butterfly_half(
             radius=rmid_inner,
             width=width_inner,
             angle=end_angle - start_angle,
-            layer=geometry_layer,
+            layer=layer,
             angle_resolution=angle_resolution,
         )
     ref.rotate(start_angle, (0, 0))
@@ -79,10 +83,8 @@ def butterfly_half(
         thicken=thicken,
         thick_ratio=thick_ratio,
         thick_width=thick_width,
-        geometry_layer=geometry_layer,
-        release_layer=release_layer,
-        release_hole_radius=release_hole_radius,
-        release_distance=release_distance,
+        layer=layer,
+        **kwargs,
     )
     (c << beam).move((rmid_beam, 0)).rotate(angles[0], (0, 0))
     (c << beam).move((rmid_beam, 0)).rotate(angles[1], (0, 0))
