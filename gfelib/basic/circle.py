@@ -4,22 +4,18 @@ import numpy as np
 
 
 @gf.cell_with_module_name
-def ring(
+def circle(
     radius: float,
-    width: float,
-    angle: float,
     geometry_layer: gf.typings.LayerSpec,
     angle_resolution: float,
     release_hole_radius: float,
     release_distance: float,
     release_layer: gf.typings.LayerSpec,
 ) -> gf.Component:
-    """Returns a ring with release holes
+    """Returns a circle with release holes
 
     Args:
-        radius: radius of the ring (midpoint between inner and outer radii)
-        width: width of the ring
-        angle: angular coverage of the ring
+        radius: radius of the circle
         geometry_layer: layer to place polygon
         angle_resolution: number of degrees per point
         release_hole_radius: radius of the release holes
@@ -28,19 +24,13 @@ def ring(
     """
     c = gf.Component()
 
-    _ = c << gf.components.ring(
+    _ = c << gf.components.circle(
         radius=radius,
-        width=width,
-        angle=angle,
         layer=geometry_layer,
         angle_resolution=angle_resolution,
     )
 
-    if (
-        2 * radius <= release_distance
-        or width <= release_distance
-        or angle * np.pi / 180 * radius <= release_distance
-    ):
+    if radius <= release_distance:
         return c
 
     hole = gf.components.circle(
@@ -48,13 +38,13 @@ def ring(
         layer=release_layer,
     )
 
-    s = 2 * (release_hole_radius + release_distance) / np.sqrt(2)
-    sr = width / (width // s + 1)
+    max_dist = 2 * (release_hole_radius + release_distance) / np.sqrt(2)
+    radial_step_size = radius / (radius // max_dist + 1.5)
 
-    for r in np.arange(radius - 0.5 * width + 0.5 * sr, radius + 0.5 * width, sr):
-        steps = angle / 180 * np.pi * (r + 0.5 * sr) // s + 1
-        dt = angle / 180 * np.pi / steps
-        t = np.arange(0.5 * dt, angle / 180 * np.pi + dt, dt)
+    for r in np.arange(0, radius, radial_step_size):
+        n_ang_steps = (2 * np.pi * r) // max_dist + 1
+        dt = 2 * np.pi / n_ang_steps
+        t = np.arange(0.5 * dt, 2 * np.pi + dt, dt)
         points = np.stack((r * np.cos(t), r * np.sin(t)), axis=-1)
         for point in points[:-1]:
             ref = c << hole

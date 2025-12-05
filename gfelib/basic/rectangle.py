@@ -30,7 +30,7 @@ def rectangle(
         centered=centered,
     )
 
-    if size[0] <= release_distance or size[1] <= release_distance:
+    if np.sqrt(size[0] ** 2 + size[1] ** 2) <= 2 * release_distance:
         return c
 
     hole = gf.components.circle(
@@ -38,12 +38,12 @@ def rectangle(
         layer=release_layer,
     )
 
-    s = 2 * (release_hole_radius + release_distance) / np.sqrt(2)
-    sx = size[0] / np.ceil(size[0] / s)
-    sy = size[1] / np.ceil(size[1] / s)
+    max_dist = 2 * (release_hole_radius + release_distance) / np.sqrt(2)
+    step_x = size[0] / np.ceil(size[0] / max_dist)
+    step_y = size[1] / np.ceil(size[1] / max_dist)
 
-    for y in np.arange(0.5 * sy, size[1], sy):
-        for x in np.arange(0.5 * sx, size[0], sx):
+    for y in np.arange(0.5 * step_y, size[1], step_y):
+        for x in np.arange(0.5 * step_x, size[0], step_x):
             ref = c << hole
             ref.move(
                 (
