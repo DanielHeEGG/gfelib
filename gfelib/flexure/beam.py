@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gdsfactory as gf
 
 import gfelib as gl
@@ -8,12 +10,10 @@ def beam(
     length: float,
     width: float,
     geometry_layer: gf.typings.LayerSpec,
+    release_spec: gl.datatypes.ReleaseSpec | None,
     thick_length: float = 0,
     thick_width: float = 0,
     thick_offset: float = 0,
-    release_hole_radius: float = 0,
-    release_distance: float = 0,
-    release_layer: gf.typings.LayerSpec = (0, 0),
 ) -> gf.Component:
     """Returns a beam with optional thick mid-section, centered at (0, 0)
 
@@ -24,9 +24,7 @@ def beam(
         thick_length: length (x) of thick section
         thick_width: width (y) of thick section
         thick_offset: offset of thick section from center, in x-direction
-        release_hole_radius: radius of the release holes
-        release_distance: maximum distance between adjacent release holes
-        release_layer: layer to place release holes
+        release_spec: release specifications, `None` for no release
     """
     c = gf.Component()
 
@@ -35,9 +33,7 @@ def beam(
             size=(length, width),
             geometry_layer=geometry_layer,
             centered=True,
-            release_hole_radius=release_hole_radius,
-            release_distance=release_distance,
-            release_layer=release_layer,
+            release_spec=release_spec,
         )
         return c
 
@@ -48,9 +44,7 @@ def beam(
         size=(thick_length, thick_width),
         geometry_layer=geometry_layer,
         centered=True,
-        release_hole_radius=release_hole_radius,
-        release_distance=release_distance,
-        release_layer=release_layer,
+        release_spec=release_spec,
     )
     rect_thick_ref.movex(thick_offset)
 
@@ -58,9 +52,7 @@ def beam(
         size=(thin_length + thick_offset, width),
         geometry_layer=geometry_layer,
         centered=True,
-        release_hole_radius=release_hole_radius,
-        release_distance=release_distance,
-        release_layer=release_layer,
+        release_spec=release_spec,
     )
     rect_thin1_ref.movex(-thin_center + 0.5 * thick_offset)
 
@@ -68,9 +60,7 @@ def beam(
         size=(thin_length - thick_offset, width),
         geometry_layer=geometry_layer,
         centered=True,
-        release_hole_radius=release_hole_radius,
-        release_distance=release_distance,
-        release_layer=release_layer,
+        release_spec=release_spec,
     )
     rect_thin2_ref.movex(thin_center + 0.5 * thick_offset)
 

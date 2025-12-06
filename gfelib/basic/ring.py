@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import gdsfactory as gf
 
 import numpy as np
+
+import gfelib as gl
 
 
 @gf.cell_with_module_name
@@ -10,9 +14,7 @@ def ring(
     angle: float,
     geometry_layer: gf.typings.LayerSpec,
     angle_resolution: float,
-    release_hole_radius: float = 0,
-    release_distance: float = 0,
-    release_layer: gf.typings.LayerSpec = (0, 0),
+    release_spec: gl.datatypes.ReleaseSpec | None,
 ) -> gf.Component:
     """Returns a ring with release holes
 
@@ -22,9 +24,7 @@ def ring(
         angle: angular coverage of the ring (unit: degrees)
         geometry_layer: layer to place polygon
         angle_resolution: number of degrees per point
-        release_hole_radius: radius of the release holes, 0 for no release
-        release_distance: maximum distance between adjacent release holes, 0 for no release
-        release_layer: layer to place release holes
+        release_spec: release specifications, `None` for no release
     """
     c = gf.Component()
 
@@ -36,22 +36,20 @@ def ring(
         angle_resolution=angle_resolution,
     )
 
-    if release_hole_radius <= 0 or release_distance <= 0:
+    if release_spec is None:
+        return c
+
+    if not release_spec.released:
         return c
 
     if (
-        radius <= release_distance
-        or width <= release_distance
-        or angle * np.pi / 180 * radius <= release_distance
+        radius <= release_spec.distance
+        or width <= release_spec.distance
+        or angle * np.pi / 180 * radius <= release_spec.distance
     ):
         return c
 
-    hole = gf.components.circle(
-        radius=release_hole_radius,
-        layer=release_layer,
-    )
-
-    s = 2 * (release_hole_radius + release_distance) / np.sqrt(2)
+    s = 2 * (release_spec.hole_radius + release_spec.distance) / np.sqrt(2)
     sr = width / (width // s + 1)
 
     for r in np.arange(radius - 0.5 * width + 0.5 * sr, radius + 0.5 * width, sr):
@@ -60,7 +58,7 @@ def ring(
         t = np.arange(0.5 * dt, angle / 180 * np.pi + dt, dt)
         points = np.stack((r * np.cos(t), r * np.sin(t)), axis=-1)
         for point in points[:-1]:
-            ref = c << hole
+            ref = c << release_spec.hole
             ref.move(point)
 
     return c
