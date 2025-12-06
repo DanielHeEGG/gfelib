@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import gdsfactory as gf
 
 import numpy as np
+
+import gfelib as gl
 
 
 @gf.cell_with_module_name
@@ -8,9 +12,7 @@ def rectangle(
     size: gf.typings.Size,
     geometry_layer: gf.typings.LayerSpec,
     centered: bool,
-    release_hole_radius: float = 0,
-    release_distance: float = 0,
-    release_layer: gf.typings.LayerSpec = (0, 0),
+    release_spec: gl.datatypes.ReleaseSpec | None,
 ) -> gf.Component:
     """Returns a rectangle with release holes
 
@@ -18,9 +20,7 @@ def rectangle(
         size: width and height of rectangle
         geometry_layer: layer to place polygon
         centered: `True` sets center to (0, 0), `False` sets south-west to (0, 0)
-        release_hole_radius: radius of the release holes, 0 for no release
-        release_distance: maximum distance between adjacent release holes, 0 for no release
-        release_layer: layer to place release holes
+        release_spec: release specifications, `None` for no release
     """
     c = gf.Component()
 
@@ -30,24 +30,22 @@ def rectangle(
         centered=centered,
     )
 
-    if release_hole_radius <= 0 or release_distance <= 0:
+    if release_spec is None:
         return c
 
-    if np.sqrt(size[0] ** 2 + size[1] ** 2) <= 2 * release_distance:
+    if not release_spec.released:
         return c
 
-    hole = gf.components.circle(
-        radius=release_hole_radius,
-        layer=release_layer,
-    )
+    if size[0] <= release_spec.distance or size[1] <= release_spec.distance:
+        return c
 
-    max_dist = 2 * (release_hole_radius + release_distance) / np.sqrt(2)
-    step_x = size[0] / np.ceil(size[0] / max_dist)
-    step_y = size[1] / np.ceil(size[1] / max_dist)
+    s = 2 * (release_spec.hole_radius + release_spec.distance) / np.sqrt(2)
+    sx = size[0] / np.ceil(size[0] / s)
+    sy = size[1] / np.ceil(size[1] / s)
 
-    for y in np.arange(0.5 * step_y, size[1], step_y):
-        for x in np.arange(0.5 * step_x, size[0], step_x):
-            ref = c << hole
+    for y in np.arange(0.5 * sy, size[1], sy):
+        for x in np.arange(0.5 * sx, size[0], sx):
+            ref = c << release_spec.hole
             ref.move(
                 (
                     x - (0.5 * size[0] if centered else 0),

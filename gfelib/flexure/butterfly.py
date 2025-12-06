@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gdsfactory as gf
 
 import numpy as np
@@ -18,9 +20,7 @@ def butterfly(
     thick_offset: float,
     release_inner: bool,
     angle_resolution: float,
-    release_hole_radius: float,
-    release_distance: float,
-    release_layer: gf.typings.LayerSpec,
+    release_spec: gl.datatypes.ReleaseSpec | None,
 ) -> gf.Component:
     """Returns a half-butterfly joint (4 beams)
 
@@ -36,9 +36,7 @@ def butterfly(
         thick_offset: offset of beam thick section, positive is away from center
         release_inner: `True` to release inner carriage
         angle_resolution: number of degrees per point
-        release_hole_radius: radius of the release holes
-        release_distance: maximum distance between adjacent release holes
-        release_layer: layer to place release holes
+        release_spec: release specifications, `None` for no release
     """
     c = gf.Component()
 
@@ -54,9 +52,7 @@ def butterfly(
         angle=180 - 2 * angle_start,
         geometry_layer=geometry_layer,
         angle_resolution=angle_resolution,
-        release_hole_radius=release_hole_radius if release_inner else 0,
-        release_distance=release_distance if release_inner else 0,
-        release_layer=release_layer,
+        release_spec=release_spec if release_inner else None,
     )
     inner_carriage_ref.rotate(angle_start, (0, 0))
 
@@ -68,9 +64,7 @@ def butterfly(
         thick_length=thick_length,
         thick_width=thick_width,
         thick_offset=thick_offset,
-        release_hole_radius=release_hole_radius,
-        release_distance=release_distance,
-        release_layer=release_layer,
+        release_spec=release_spec,
     )
     for a in [angles[0], angles[1], 180 - angles[1], 180 - angles[0]]:
         ref = c << beam
