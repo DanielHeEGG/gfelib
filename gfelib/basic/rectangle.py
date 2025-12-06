@@ -8,9 +8,9 @@ def rectangle(
     size: gf.typings.Size,
     geometry_layer: gf.typings.LayerSpec,
     centered: bool,
-    release_hole_radius: float,
-    release_distance: float,
-    release_layer: gf.typings.LayerSpec,
+    release_hole_radius: float = 0,
+    release_distance: float = 0,
+    release_layer: gf.typings.LayerSpec = (0, 0),
 ) -> gf.Component:
     """Returns a rectangle with release holes
 
@@ -18,8 +18,8 @@ def rectangle(
         size: width and height of rectangle
         geometry_layer: layer to place polygon
         centered: `True` sets center to (0, 0), `False` sets south-west to (0, 0)
-        release_hole_radius: radius of the release holes
-        release_distance: maximum distance between adjacent release holes
+        release_hole_radius: radius of the release holes, 0 for no release
+        release_distance: maximum distance between adjacent release holes, 0 for no release
         release_layer: layer to place release holes
     """
     c = gf.Component()
@@ -29,6 +29,9 @@ def rectangle(
         layer=geometry_layer,
         centered=centered,
     )
+
+    if release_hole_radius <= 0 or release_distance <= 0:
+        return c
 
     if np.sqrt(size[0] ** 2 + size[1] ** 2) <= 2 * release_distance:
         return c

@@ -8,9 +8,9 @@ def circle(
     radius: float,
     geometry_layer: gf.typings.LayerSpec,
     angle_resolution: float,
-    release_hole_radius: float,
-    release_distance: float,
-    release_layer: gf.typings.LayerSpec,
+    release_hole_radius: float = 0,
+    release_distance: float = 0,
+    release_layer: gf.typings.LayerSpec = (0, 0),
 ) -> gf.Component:
     """Returns a circle with release holes
 
@@ -18,8 +18,8 @@ def circle(
         radius: radius of the circle
         geometry_layer: layer to place polygon
         angle_resolution: number of degrees per point
-        release_hole_radius: radius of the release holes
-        release_distance: maximum distance between adjacent release holes
+        release_hole_radius: radius of the release holes, 0 for no release
+        release_distance: maximum distance between adjacent release holes, 0 for no release
         release_layer: layer to place release holes
     """
     c = gf.Component()
@@ -29,6 +29,9 @@ def circle(
         layer=geometry_layer,
         angle_resolution=angle_resolution,
     )
+
+    if release_hole_radius <= 0 or release_distance <= 0:
+        return c
 
     if radius <= release_distance:
         return c

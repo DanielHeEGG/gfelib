@@ -1,4 +1,5 @@
 # gfelib main module
 # import all submodules here
 
-from gfelib import released, flexure
+from gfelib import basic
+from gfelib import flexure
