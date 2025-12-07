@@ -14,12 +14,10 @@ def butterfly(
     width_inner: float,
     width_beam: float,
     angles: tuple[float, float],
-    geometry_layer: gf.typings.LayerSpec,
-    thick_length: float,
-    thick_width: float,
-    thick_offset: float,
     release_inner: bool,
+    geometry_layer: gf.typings.LayerSpec,
     angle_resolution: float,
+    beam_spec: gl.datatypes.BeamSpec | None,
     release_spec: gl.datatypes.ReleaseSpec | None,
 ) -> gf.Component:
     """Returns a half-butterfly joint (4 beams)
@@ -30,12 +28,10 @@ def butterfly(
         width_inner: width of the inner carriage
         width_beam: width of the beams
         angles: angles to place beams
-        geometry_layer: layer to place polygon
-        thick_length: length of beam thick section
-        thick_width: width of beam thick section
-        thick_offset: offset of beam thick section, positive is away from center
         release_inner: `True` to release inner carriage
+        geometry_layer: layer to place polygon
         angle_resolution: number of degrees per point
+        beam_spec: complex beam specifications, `None` for default
         release_spec: release specifications, `None` for no release
     """
     c = gf.Component()
@@ -61,9 +57,7 @@ def butterfly(
         length=radius_outer - radius_inner - width_inner + 0.5 * width_beam,
         width=width_beam,
         geometry_layer=geometry_layer,
-        thick_length=thick_length,
-        thick_width=thick_width,
-        thick_offset=thick_offset,
+        beam_spec=beam_spec,
         release_spec=release_spec,
     )
     for a in [angles[0], angles[1], 180 - angles[1], 180 - angles[0]]:

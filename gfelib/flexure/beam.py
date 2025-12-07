@@ -10,10 +10,8 @@ def beam(
     length: float,
     width: float,
     geometry_layer: gf.typings.LayerSpec,
+    beam_spec: gl.datatypes.BeamSpec | None,
     release_spec: gl.datatypes.ReleaseSpec | None,
-    thick_length: float = 0,
-    thick_width: float = 0,
-    thick_offset: float = 0,
 ) -> gf.Component:
     """Returns a beam with optional thick mid-section, centered at (0, 0)
 
@@ -21,21 +19,24 @@ def beam(
         length: length (x) of beam
         width: width (y) of beam
         geometry_layer: layer to place polygon
-        thick_length: length (x) of thick section
-        thick_width: width (y) of thick section
-        thick_offset: offset of thick section from center, in x-direction
+        beam_spec: complex beam specifications, `None` for default
         release_spec: release specifications, `None` for no release
     """
     c = gf.Component()
 
-    if thick_length == 0 or thick_width == width:
+    if not beam_spec.thickened:
         _ = c << gl.basic.rectangle(
             size=(length, width),
             geometry_layer=geometry_layer,
             centered=True,
             release_spec=release_spec,
         )
+        c.flatten()
         return c
+
+    thick_length = beam_spec.get_thick_length(length)
+    thick_width = beam_spec.get_thick_width(width)
+    thick_offset = beam_spec.get_thick_offset(length)
 
     thin_length = 0.5 * (length - thick_length)
     thin_center = 0.5 * (thick_length + thin_length)
