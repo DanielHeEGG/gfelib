@@ -38,14 +38,14 @@ def butterfly(
 
     angles = sorted(angles)
 
-    angle_start = angles[0] - 0.5 * width_beam / (radius_inner + width_inner) / (
+    angle_end = angles[1] + 0.5 * width_beam / (radius_inner + width_inner) / (
         np.pi / 180
     )
 
     _ = c << gl.basic.ring(
         radius=radius_inner + 0.5 * width_inner,
         width=width_inner,
-        angles=(angle_start, 180 - angle_start),
+        angles=(-angle_end, angle_end),
         geometry_layer=geometry_layer,
         angle_resolution=angle_resolution,
         release_spec=release_spec if release_inner else None,
@@ -59,7 +59,7 @@ def butterfly(
         beam_spec=beam_spec,
         release_spec=release_spec,
     )
-    for a in [angles[0], angles[1], 180 - angles[1], 180 - angles[0]]:
+    for a in [-angles[0], -angles[1], angles[0], angles[1]]:
         ref = c << beam
         ref.move((beam_offset, 0)).rotate(a, (0, 0))
 
