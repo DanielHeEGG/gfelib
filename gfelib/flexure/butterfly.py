@@ -42,15 +42,14 @@ def butterfly(
         np.pi / 180
     )
 
-    inner_carriage_ref = c << gl.basic.ring(
+    _ = c << gl.basic.ring(
         radius=radius_inner + 0.5 * width_inner,
         width=width_inner,
-        angle=180 - 2 * angle_start,
+        angles=(angle_start, 180 - angle_start),
         geometry_layer=geometry_layer,
         angle_resolution=angle_resolution,
         release_spec=release_spec if release_inner else None,
     )
-    inner_carriage_ref.rotate(angle_start, (0, 0))
 
     beam_offset = 0.5 * (radius_outer + radius_inner + width_inner)
     beam = gl.flexure.beam(
