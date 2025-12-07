@@ -37,9 +37,9 @@ beam_cavity = gfelib.flexure.beam_cavity(
     length=100,
     width=10,
     geometry_layer=0,
-    etch_layer=3,
-    etch_width=50,
-    etch_length_offset=10,
+    cavity_layer=3,
+    cavity_width=50,
+    cavity_length_offset=10,
 )
 butt = gfelib.flexure.butterfly(
     radius_inner=100,
@@ -54,6 +54,19 @@ butt = gfelib.flexure.butterfly(
     release_spec=release,
 )
 
+zpant = gfelib.flexure.zpant(
+    width_stage=200,
+    length_stage=600,
+    width_beam=12,
+    length_beam=100,
+    geometry_layer=0,
+    release_specs=None,
+    cavity_layer=3,
+    cavity_width=50,
+    cavity_length_offset=10,
+    handle_layer=2,
+)
+
 # poly = ((0, 0), (200, 200), (0, 800), (-400, 400))
 poly = ((-400, 400), (-300, 200), (200, 200), (0, 0))
 polygon = gfelib.basic.polygon(points=poly, geometry_layer=0, release_spec=release)
@@ -64,6 +77,6 @@ polygon = gfelib.basic.polygon(points=poly, geometry_layer=0, release_spec=relea
 (c << beam).move((-300, 0))
 (c << butt).move((0, 1000))
 (c << polygon).move((-1000, -1000))
-
 (c << beam_cavity).move((-300, 200))
+(c << zpant).move((0, -1000))
 c.show()
