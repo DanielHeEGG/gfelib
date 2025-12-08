@@ -5,7 +5,7 @@ import gdsfactory as gf
 import gfelib as gl
 
 
-@gf.cell_with_module_name
+@gf.cell_with_module_name(check_instances=False)
 def beam(
     length: float,
     width: float,
@@ -32,7 +32,6 @@ def beam(
             layer=geometry_layer,
             centered=True,
         )
-        c.flatten()
         return c
 
     thick_length = beam_spec.get_thick_length(length)
@@ -63,7 +62,5 @@ def beam(
         centered=True,
     )
     rect_thin2_ref.movex(thin_center + 0.5 * thick_offset)
-
-    c.flatten()
 
     return c

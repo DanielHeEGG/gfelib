@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name
+@gf.cell_with_module_name(check_instances=False)
 def butterfly(
     radius_inner: float,
     radius_outer: float,
@@ -62,7 +62,5 @@ def butterfly(
     for a in [-angles[0], -angles[1], angles[0], angles[1]]:
         ref = c << beam
         ref.move((beam_offset, 0)).rotate(a, (0, 0))
-
-    c.flatten()
 
     return c
