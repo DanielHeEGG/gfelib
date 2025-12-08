@@ -41,6 +41,7 @@ def beam(
     thin_length = 0.5 * (length - thick_length)
     thin_center = 0.5 * (thick_length + thin_length)
 
+    # Emit thick section
     rect_thick_ref = c << gl.basic.rectangle(
         size=(thick_length, thick_width),
         geometry_layer=geometry_layer,

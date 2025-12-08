@@ -43,8 +43,8 @@ def circle(
     sr = radius / (radius // s + 1.5)
 
     for r in np.arange(0, radius, sr):
-        steps = 2 * np.pi * r // s + 1
-        dt = 2 * np.pi / steps
+        n_ang_steps = (2 * np.pi * r) // s + 1
+        dt = 2 * np.pi / n_ang_steps
         t = np.arange(0.5 * dt, 2 * np.pi + dt, dt)
         points = np.stack((r * np.cos(t), r * np.sin(t)), axis=-1)
         for point in points[:-1]:
