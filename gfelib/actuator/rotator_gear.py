@@ -8,7 +8,7 @@ from collections.abc import Sequence
 import gfelib as gl
 
 
-@gf.cell_with_module_name
+@gf.cell_with_module_name(check_instances=False)
 def rotator_gear(
     radius_inner: float,
     radius_outer: float,
@@ -52,6 +52,8 @@ def rotator_gear(
     teeth_width_angle = teeth_width / radius_teeth_inner / (np.pi / 180)
     teeth_pitch_angle = teeth_pitch / radius_teeth_inner / (np.pi / 180)
 
+    teeth_ring_overlap = gl.utils.sagitta_offset_safe(radius_teeth_inner, teeth_width)
+
     stator_teeth_angles = []
     angle_offset = 0
     for phase in teeth_phase:
@@ -66,17 +68,17 @@ def rotator_gear(
 
     rotor_radius = radius_inner + 0.5 * width_inner
     rotor_width = width_inner
-    rotor_teeth_x = radius_teeth_inner + 0.4 * teeth_height
+    rotor_teeth_x = radius_teeth_inner + (0.5 * teeth_height - teeth_ring_overlap)
     stator_radius = 0.5 * (radius_teeth_outer + radius_outer)
     stator_width = radius_outer - radius_teeth_outer
-    stator_teeth_x = radius_teeth_outer - 0.4 * teeth_height
+    stator_teeth_x = radius_teeth_outer - (0.5 * teeth_height - teeth_ring_overlap)
     if not inner_rotor:
         rotor_radius, stator_radius = stator_radius, rotor_radius
         rotor_width, stator_width = stator_width, rotor_width
         rotor_teeth_x, stator_teeth_x = stator_teeth_x, rotor_teeth_x
 
     teeth = gf.components.rectangle(
-        size=(teeth_height * 1.1, teeth_width),
+        size=(teeth_height + teeth_ring_overlap, teeth_width),
         layer=geometry_layer,
         centered=True,
     )
@@ -125,5 +127,4 @@ def rotator_gear(
             ref.movex(stator_teeth_x)
             ref.rotate(angle + stator_offset, (0, 0))
 
-    c.flatten()
     return c
