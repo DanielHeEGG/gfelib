@@ -10,7 +10,7 @@ mems_pdk.activate()
 c = gf.Component()
 
 release = gfd.ReleaseSpec(
-    hole_radius=3, distance=6, layer=LAYER.device_etch, angle_resolution=1
+    hole_radius=3, distance=6, layer=LAYER.device_etch, angle_resolution=18
 )
 bs = gfd.BeamSpec(thick_length=(0, 0.7), thick_offset=(0, 0), thick_width=(20, 0))
 
@@ -86,6 +86,16 @@ zpant = gfelib.mega.zlever(
     separator_margin=10,
 )
 
+chip = gfelib.mega.chip(
+    size=(5000, 4000),
+    margin=100,
+    width_mesh=100,
+    width_cavity=50,
+    geometry_layer=LAYER.device,
+    cavity_layer=LAYER.handle_etch,
+    release_specs=release,
+)
+
 # poly = ((0, 0), (200, 200), (0, 800), (-400, 400))
 poly = ((-400, 400), (-300, 200), (200, 200), (0, 0))
 polygon = gfelib.basic.polygon(
@@ -100,4 +110,5 @@ polygon = gfelib.basic.polygon(
 (c << polygon).move((-1000, -1000))
 (c << beam_cavity).move((-300, 200))
 (c << zpant).move((0, -1000))
+c << chip
 c.show()
