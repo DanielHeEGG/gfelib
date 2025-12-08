@@ -6,3 +6,4 @@ from __future__ import annotations
 from gfelib import basic
 from gfelib import datatypes
 from gfelib import flexure
+from gfelib import utils
