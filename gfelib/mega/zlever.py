@@ -132,14 +132,15 @@ def zlever(
 
         if stopper_polarity == "in":
             # Generate meshed part for inside stopper
+            holes_right = max(width_stage / 2, width_stage / 2 + handle_offset)
             holes = gl.basic.rectangle(
-                size=(width_stage / 2 - iso_left, length_stage * stopper_width),
+                size=(holes_right - iso_left, length_stage * stopper_width),
                 centered=True,
                 release_spec=stopper_release_specs,
                 geometry_layer=geometry_layer,
             )
-            (c << holes).move(((iso_left + width_stage / 2) / 2, stopper_center[1]))
-            (c << holes).move((-(iso_left + width_stage / 2) / 2, stopper_center[1]))
+            (c << holes).move(((iso_left + holes_right) / 2, stopper_center[1]))
+            (c << holes).move((-(iso_left + holes_right) / 2, stopper_center[1]))
 
     cnew = gf.boolean(
         c,

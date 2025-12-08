@@ -51,8 +51,8 @@ def zpant(
             # Generate handle layer block if specified
             _ = c << gf.components.rectangle(
                 size=(
-                    width_stage + handle_offset,
-                    length_stage + width_beam + handle_offset,
+                    width_stage + 2 * handle_offset,
+                    length_stage + width_beam + 2 * handle_offset,
                 ),
                 layer=handle_layer,
                 centered=True,
