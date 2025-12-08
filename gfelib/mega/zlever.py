@@ -41,8 +41,13 @@ def zlever(
         cavity_layer: layer to generate cavity beneath the beams
         cavity_width: width of the cavities beneath the beams
         cavity_length_offset: length offset of the cavities
-        release_specs: if not None, the stage will be made hollow by adding release holes according to the specs.
-            Handle layer block generation is automatically disabled in this case
+        stopper_pos: Edge position(s) of stoppers (in fraction of length_stage). If None, skip stoppers. Can be a list for multiple stoppers
+        stopper_polarity: "out" for holes outside, "in" for holes inside. Can be a list
+        stopper_length: length (x) of stopper that extends out of the stage. Can be a list
+        stopper_width: width (y) of stopper (in fraction of length_stage). Can be a list
+        stopper_release_specs: Release hole specs for holes on the stopper. If None, no hole is generated
+        separator_gap: Gap between electrically isolated parts
+        separator_margin: Central clearance width
 
     """
     if stopper_pos:
@@ -133,9 +138,10 @@ def zlever(
 
             # Generate stopper isolation
             # Check that the stopper is wide enough
-            assert (
-                length_stage * swid >= 2 * stopper_release_specs.distance
-            ), ValueError("Stopper is too narrow, will get released")
+            if stopper_release_specs:
+                assert (
+                    length_stage * swid >= 2 * stopper_release_specs.distance
+                ), ValueError("Stopper is too narrow, will get released")
             iso_left = separator_gap + separator_margin
             iso_right = width_stage / 2 + slen
             r0 = gf.components.rectangle(
@@ -166,7 +172,7 @@ def zlever(
             sep << iso
             (sep << iso).mirror_x()
 
-            if spol == "in":
+            if spol == "in" and stopper_release_specs:
                 # Generate meshed part for inside stopper
                 holes_right = max(width_stage / 2, width_stage / 2 + handle_offset)
                 holes = gl.basic.rectangle(
