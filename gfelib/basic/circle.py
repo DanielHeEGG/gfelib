@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name
+@gf.cell_with_module_name(check_instances=False)
 def circle(
     radius: float,
     geometry_layer: gf.typings.LayerSpec,

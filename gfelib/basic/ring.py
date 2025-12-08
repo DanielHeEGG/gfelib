@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name
+@gf.cell_with_module_name(check_instances=False)
 def ring(
     radius: float,
     width: float,
@@ -42,11 +42,9 @@ def ring(
     ring_ref.rotate(angles[0], (0, 0))
 
     if release_spec is None:
-        c.flatten()
         return c
 
     if not release_spec.released:
-        c.flatten()
         return c
 
     if (
@@ -54,7 +52,6 @@ def ring(
         or width <= release_spec.distance
         or span * np.pi / 180 * radius <= release_spec.distance
     ):
-        c.flatten()
         return c
 
     s = 2 * (release_spec.hole_radius + release_spec.distance) / np.sqrt(2)
@@ -70,5 +67,4 @@ def ring(
             ref.move(point)
             ref.rotate(angles[0], (0, 0))
 
-    c.flatten()
     return c

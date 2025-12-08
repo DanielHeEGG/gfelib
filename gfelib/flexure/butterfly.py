@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name
+@gf.cell_with_module_name(check_instances=False)
 def butterfly(
     radius_inner: float,
     radius_outer: float,
@@ -53,7 +53,9 @@ def butterfly(
 
     beam_offset = 0.5 * (radius_outer + radius_inner + width_inner)
     beam = gl.flexure.beam(
-        length=radius_outer - radius_inner - width_inner + 0.5 * width_beam,
+        length=radius_outer
+        - (radius_inner + width_inner)
+        + 2 * gl.utils.sagitta_offset_safe(radius_inner + width_inner, width_beam),
         width=width_beam,
         geometry_layer=geometry_layer,
         beam_spec=beam_spec,
@@ -62,7 +64,5 @@ def butterfly(
     for a in [-angles[0], -angles[1], angles[0], angles[1]]:
         ref = c << beam
         ref.move((beam_offset, 0)).rotate(a, (0, 0))
-
-    c.flatten()
 
     return c
