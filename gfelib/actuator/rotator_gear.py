@@ -33,8 +33,8 @@ def rotator_gear(
         radius_inner: inner carriage inner radius
         radius_outer: outer carriage outer radius
         width_inner: inner carriage width
-        teeth_pitch: electrostatic teeth pitch, in units of length
-        teeth_width: electrostatic teeth width, in units of length
+        teeth_pitch: electrostatic teeth pitch (unit: degrees)
+        teeth_width: electrostatic teeth width
         teeth_height: electrostatic teeth height
         teeth_clearance: teeth clearance between stator and rotor
         teeth_phase: phase offsets for each bank of teeth (unit: degrees)
@@ -50,21 +50,20 @@ def rotator_gear(
     radius_teeth_inner = radius_inner + width_inner
     radius_teeth_outer = radius_teeth_inner + 2 * teeth_height + teeth_clearance
     teeth_width_angle = teeth_width / radius_teeth_inner / (np.pi / 180)
-    teeth_pitch_angle = teeth_pitch / radius_teeth_inner / (np.pi / 180)
 
     teeth_ring_overlap = gl.utils.sagitta_offset_safe(radius_teeth_inner, teeth_width)
 
     stator_teeth_angles = []
     angle_offset = 0
     for phase in teeth_phase:
-        angle_offset += phase * teeth_pitch_angle / 360
+        angle_offset += phase * teeth_pitch / 360
         phase_angles = []
         for _ in range(teeth_count):
             phase_angles.append(angle_offset)
-            angle_offset += teeth_pitch_angle
-        angle_offset -= phase * teeth_pitch_angle / 360
+            angle_offset += teeth_pitch
+        angle_offset -= phase * teeth_pitch / 360
         stator_teeth_angles.append(phase_angles)
-    stator_offset = -0.5 * angle_offset + 0.5 * teeth_pitch_angle
+    stator_offset = -0.5 * angle_offset + 0.5 * teeth_pitch
 
     rotor_radius = radius_inner + 0.5 * width_inner
     rotor_width = width_inner
@@ -95,9 +94,9 @@ def rotator_gear(
 
     # rotor teeth
     for angle in np.arange(
-        0.5 * teeth_pitch_angle,
-        0.5 * (rotor_span - teeth_pitch_angle),
-        teeth_pitch_angle,
+        0.5 * teeth_pitch,
+        0.5 * (rotor_span - teeth_pitch),
+        teeth_pitch,
     ):
         ref_pos = c << teeth
         ref_pos.movex(rotor_teeth_x)
