@@ -20,10 +20,10 @@ def zlever(
     cavity_layer: gf.typings.LayerSpec | None = None,
     cavity_width: float = 0,
     cavity_length_offset: float = 0,
-    stopper_pos: float | None = None,
-    stopper_polarity: Literal["in", "out"] = "out",
-    stopper_length: float = 0,
-    stopper_width: float = 0,
+    stopper_pos: float | list[float] | None = None,
+    stopper_polarity: Literal["in", "out"] | list[Literal["in", "out"]] = "out",
+    stopper_length: float | list[float] = 0,
+    stopper_width: float | list[float] = 0,
     stopper_release_specs: gl.datatypes.ReleaseSpec | None = None,
     separator_gap: float = 2,
     separator_margin: float = 5,
@@ -45,6 +45,16 @@ def zlever(
             Handle layer block generation is automatically disabled in this case
 
     """
+    if stopper_pos:
+        if not isinstance(stopper_pos, list):
+            stopper_pos: list[float] = [stopper_pos]
+        if not isinstance(stopper_length, list):
+            stopper_length: list[float] = [stopper_length]
+        if not isinstance(stopper_width, list):
+            stopper_width: list[float] = [stopper_width]
+        if not isinstance(stopper_polarity, list):
+            stopper_polarity: list[Literal["in", "out"]] = [stopper_polarity]
+
     c = gf.Component()
     _ = c << gl.flexure.zpant(
         width_stage=width_stage,
@@ -69,78 +79,85 @@ def zlever(
     )
 
     if stopper_pos:
-        stopper_center = np.array(
-            (
-                width_stage / 2 + stopper_length / 2,
-                length_stage * (0.5 - stopper_pos + 0.5 * stopper_width),
+        for spos, spol, slen, swid in zip(
+            stopper_pos, stopper_polarity, stopper_length, stopper_width
+        ):
+            stopper_center = np.array(
+                (
+                    width_stage / 2 + slen / 2,
+                    (
+                        length_stage * (0.5 - spos + 0.5 * swid)
+                        if spol == "out"
+                        else length_stage * (0.5 - spos - 0.5 * swid)
+                    ),
+                )
             )
-        )
 
-        if stopper_polarity == "out":
-            # Meshed part is outside
-            stopper = gl.basic.rectangle(
-                size=(stopper_length, length_stage * stopper_width),
+            if spol == "out":
+                # Meshed part is outside
+                stopper = gl.basic.rectangle(
+                    size=(slen, length_stage * swid),
+                    centered=True,
+                    release_spec=stopper_release_specs,
+                    geometry_layer=geometry_layer,
+                )
+            else:
+                # Meshed part is inside
+                stopper = gf.components.rectangle(
+                    size=(slen, length_stage * swid),
+                    centered=True,
+                    layer=geometry_layer,
+                )
+
+            (c << stopper).move(tuple(np.array((1, 1)) * stopper_center))
+            (c << stopper).move(tuple(np.array((-1, 1)) * stopper_center))
+
+            # Generate stopper isolation
+            # Check that the stopper is wide enough
+            assert (
+                length_stage * swid >= 2 * stopper_release_specs.distance
+            ), ValueError("Stopper is too narrow, will get released")
+            iso_left = separator_gap + separator_margin
+            iso_right = width_stage / 2 + slen
+            r0 = gf.components.rectangle(
+                size=(iso_right - iso_left, length_stage * swid),
+                layer=geometry_layer,
                 centered=True,
-                release_spec=stopper_release_specs,
-                geometry_layer=geometry_layer,
             )
-        else:
-            # Meshed part is inside
-            stopper = gf.components.rectangle(
-                size=(stopper_length, length_stage * stopper_width),
+
+            r1 = gf.components.rectangle(
+                size=(
+                    iso_right - iso_left + 2 * separator_gap,
+                    length_stage * swid + 2 * separator_gap,
+                ),
+                layer=geometry_layer,
                 centered=True,
+            )
+
+            r01 = gf.boolean(
+                A=r1,
+                B=r0,
+                operation="A-B",
                 layer=geometry_layer,
             )
 
-        (c << stopper).move(tuple(np.array((1, 1)) * stopper_center))
-        (c << stopper).move(tuple(np.array((-1, 1)) * stopper_center))
+            iso = gf.Component()
+            (iso << r01).move(((iso_left + iso_right) / 2, stopper_center[1]))
+            # Emit the ring twice
+            sep << iso
+            (sep << iso).mirror_x()
 
-        # Generate stopper isolation
-        # Check that the stopper is wide enough
-        assert (
-            length_stage * stopper_width >= 2 * stopper_release_specs.distance
-        ), ValueError("Stopper is too narrow, will get released")
-        iso_left = separator_gap + separator_margin
-        iso_right = width_stage / 2 + stopper_length
-        r0 = gf.components.rectangle(
-            size=(iso_right - iso_left, length_stage * stopper_width),
-            layer=geometry_layer,
-            centered=True,
-        )
-
-        r1 = gf.components.rectangle(
-            size=(
-                iso_right - iso_left + 2 * separator_gap,
-                length_stage * stopper_width + 2 * separator_gap,
-            ),
-            layer=geometry_layer,
-            centered=True,
-        )
-
-        r01 = gf.boolean(
-            A=r1,
-            B=r0,
-            operation="A-B",
-            layer=geometry_layer,
-        )
-
-        iso = gf.Component()
-        (iso << r01).move(((iso_left + iso_right) / 2, stopper_center[1]))
-        # Emit the ring twice
-        sep << iso
-        (sep << iso).mirror_x()
-
-        if stopper_polarity == "in":
-            # Generate meshed part for inside stopper
-            holes_right = max(width_stage / 2, width_stage / 2 + handle_offset)
-            holes = gl.basic.rectangle(
-                size=(holes_right - iso_left, length_stage * stopper_width),
-                centered=True,
-                release_spec=stopper_release_specs,
-                geometry_layer=geometry_layer,
-            )
-            (c << holes).move(((iso_left + holes_right) / 2, stopper_center[1]))
-            (c << holes).move((-(iso_left + holes_right) / 2, stopper_center[1]))
+            if spol == "in":
+                # Generate meshed part for inside stopper
+                holes_right = max(width_stage / 2, width_stage / 2 + handle_offset)
+                holes = gl.basic.rectangle(
+                    size=(holes_right - iso_left, length_stage * swid),
+                    centered=True,
+                    release_spec=stopper_release_specs,
+                    geometry_layer=geometry_layer,
+                )
+                (c << holes).move(((iso_left + holes_right) / 2, stopper_center[1]))
+                (c << holes).move((-(iso_left + holes_right) / 2, stopper_center[1]))
 
     cnew = gf.boolean(
         c,
