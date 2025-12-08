@@ -180,7 +180,24 @@ def build_zstage():
 
 
 def build_rotator():
-    pass
+    c = gf.Component()
+    c << gl.actuator.rotator_gear(
+        radius_inner=1000,
+        radius_outer=1500,
+        width_inner=50,
+        teeth_pitch=3,
+        teeth_width=2.5,
+        teeth_height=7,
+        teeth_clearance=3.0,
+        teeth_phase=(-1 / 3, 0, 1 / 3),
+        teeth_count=60,
+        inner_rotor=True,
+        rotor_span=160,
+        geometry_layer=LAYER.device,
+        angle_resolution=1.0,
+        release_spec=rs,
+    )
+    return c
 
 
 def build_interconnects():
@@ -206,5 +223,8 @@ def build_MEGA2D() -> gf.Component:
 
     # Emit zstage
     c << build_zstage()
+
+    # Emit rotator
+    c << build_rotator()
 
     return c

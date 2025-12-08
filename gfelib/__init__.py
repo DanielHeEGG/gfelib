@@ -9,3 +9,4 @@ from gfelib import datatypes
 from gfelib import flexure
 from gfelib import mega
 from gfelib import pdk
+from gfelib import utils
