@@ -7,3 +7,4 @@ from gfelib import basic
 from gfelib import datatypes
 from gfelib import flexure
 from gfelib import mega
+from gfelib import pdk

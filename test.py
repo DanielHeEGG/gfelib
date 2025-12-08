@@ -1,9 +1,9 @@
 import gfelib
 import gdsfactory as gf
-import gdsfactory.generic_tech
 import gfelib.datatypes as gfd
 import numpy as np
-from mems_pdk import mems_pdk, LAYER
+from gfelib.pdk import mems_pdk, LAYER
+from designs.MEGA2D import build_MEGA2D
 
 mems_pdk.activate()
 
@@ -102,13 +102,17 @@ polygon = gfelib.basic.polygon(
     points=poly, geometry_layer=LAYER.device, release_spec=release
 )
 
-(c << circ).move((500, 500))
-(c << rect).move((100, 100))
-(c << ring).move((-100, 200))
-(c << beam).move((-300, 0))
-(c << butt).move((0, 1000))
-(c << polygon).move((-1000, -1000))
-(c << beam_cavity).move((-300, 200))
-(c << zpant).move((0, -1000))
-c << chip
-c.show()
+mega2d = build_MEGA2D()
+
+mega2d.show()
+
+# (c << circ).move((500, 500))
+# (c << rect).move((100, 100))
+# (c << ring).move((-100, 200))
+# (c << beam).move((-300, 0))
+# (c << butt).move((0, 1000))
+# (c << polygon).move((-1000, -1000))
+# (c << beam_cavity).move((-300, 200))
+# (c << zpant).move((0, -1000))
+# c << chip
+# c.show()
