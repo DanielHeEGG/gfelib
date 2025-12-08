@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Literal
 
 import gdsfactory as gf
 
@@ -20,6 +21,7 @@ def zlever(
     cavity_width: float = 0,
     cavity_length_offset: float = 0,
     stopper_pos: float | None = None,
+    stopper_polarity: Literal["in", "out"] = "out",
     stopper_length: float = 0,
     stopper_width: float = 0,
     stopper_release_specs: gl.datatypes.ReleaseSpec | None = None,
@@ -74,12 +76,22 @@ def zlever(
             )
         )
 
-        stopper = gl.basic.rectangle(
-            size=(stopper_length, length_stage * stopper_width),
-            centered=True,
-            release_spec=stopper_release_specs,
-            geometry_layer=geometry_layer,
-        )
+        if stopper_polarity == "out":
+            # Meshed part is outside
+            stopper = gl.basic.rectangle(
+                size=(stopper_length, length_stage * stopper_width),
+                centered=True,
+                release_spec=stopper_release_specs,
+                geometry_layer=geometry_layer,
+            )
+        else:
+            # Meshed part is inside
+            stopper = gf.components.rectangle(
+                size=(stopper_length, length_stage * stopper_width),
+                centered=True,
+                layer=geometry_layer,
+            )
+
         (c << stopper).move(tuple(np.array((1, 1)) * stopper_center))
         (c << stopper).move(tuple(np.array((-1, 1)) * stopper_center))
 
@@ -117,6 +129,17 @@ def zlever(
         # Emit the ring twice
         sep << iso
         (sep << iso).mirror_x()
+
+        if stopper_polarity == "in":
+            # Generate meshed part for inside stopper
+            holes = gl.basic.rectangle(
+                size=(width_stage / 2 - iso_left, length_stage * stopper_width),
+                centered=True,
+                release_spec=stopper_release_specs,
+                geometry_layer=geometry_layer,
+            )
+            (c << holes).move(((iso_left + width_stage / 2) / 2, stopper_center[1]))
+            (c << holes).move((-(iso_left + width_stage / 2) / 2, stopper_center[1]))
 
     cnew = gf.boolean(
         c,

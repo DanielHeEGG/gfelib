@@ -76,6 +76,7 @@ zpant = gfelib.mega.zlever(
     stopper_pos=0.3,
     stopper_width=0.2,
     stopper_release_specs=release,
+    stopper_polarity="in",
     cavity_layer=LAYER.handle_etch,
     cavity_width=50,
     cavity_length_offset=-10,
