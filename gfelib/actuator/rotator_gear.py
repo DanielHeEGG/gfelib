@@ -37,7 +37,7 @@ def rotator_gear(
         teeth_width: electrostatic teeth width
         teeth_height: electrostatic teeth height
         teeth_clearance: teeth clearance between stator and rotor
-        teeth_phase: phase offsets for each bank of teeth (unit: degrees)
+        teeth_phase: electrical phase offsets for each bank of teeth (unit: degrees)
         teeth_count: number of teeth per bank
         inner_rotor: `True` sets inner carriage as rotor nad outer carriage as stator, vice versa
         rotor_span: angular width of the rotor carriage (unit: degrees)
