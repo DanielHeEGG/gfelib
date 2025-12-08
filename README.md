@@ -14,6 +14,12 @@ $ pip install -e lib/gfelib
 ```
 
 ## Contributing
+- Each component shall have it's own file, and be imported by the submodule's `__init__.py` file
+- All new related components, features, or bugfixes shall have it's own branch with a descriptive name: `feature/your_new_feature` or `bugfix/your_fix`
+- Each aforementioned branch shall have it's own pull request, the default merging strategy is `Squash and Merge`
+- Use the provided `.pre-commit-config.yaml` file for commit checks
+- Follow the general style guide in `STYLEGUIDE.md`
+
 ```sh
 # fork this repo on GitHub
 
@@ -32,7 +38,7 @@ $ pip install gdsfactory numpy
 $ pre-commit install
 
 # create a new branch for your component
-$ git checkout -b your_new_component
+$ git checkout -b feature/your_new_component
 
 # add commits and push
 $ git commit -m "your commit message"
@@ -40,7 +46,3 @@ $ git push origin your_new_component
 
 # create a PR on GitHub
 ```
-- Each component shall have it's own file, and be imported by the submodule's `__init__.py` file
-- Each new component shall be added in it's own pull request
-- Use the provided `.pre-commit-config.yaml` file for commit checks
-- Follow the general style guide in `STYLEGUIDE.md`
