@@ -37,7 +37,7 @@ def polygon(
     bb = c.kcl.to_um(shape.bbox())  # Get bounding box
     size = [bb.width(), bb.height()]
     origin = [bb.left, bb.bottom]
-    print(origin, size)
+    # print(origin, size)
 
     if not release_spec.released:
         return c
