@@ -68,13 +68,13 @@ butt = gfelib.flexure.butterfly(
 
 zpant = gfelib.mega.zlever(
     width_stage=200,
-    length_stage=600,
+    length_stage=400,
     width_beam=12,
     length_beam=100,
     geometry_layer=LAYER.device,
     stopper_pos=[0.3, 0.7],
-    stopper_width=[0.2, 0.2],
-    stopper_length=[100, 100],
+    stopper_width=[-1, -1],
+    stopper_length=[50, 100],
     stopper_polarity=["out", "in"],
     stopper_release_specs=release,
     cavity_layer=LAYER.handle_etch,

@@ -79,9 +79,28 @@ def zlever(
     )
 
     if stopper_pos:
+        min_stop_frac = (0.5 * width_beam + separator_gap) / length_stage
+        max_stop_frac = 1 - min_stop_frac
         for spos, spol, slen, swid in zip(
             stopper_pos, stopper_polarity, stopper_length, stopper_width
         ):
+            assert min_stop_frac <= spos <= max_stop_frac, ValueError(
+                f"Stopper position must be between {min_stop_frac} and {max_stop_frac}"
+            )
+            if spol == "out":
+                if swid == -1:
+                    swid = spos - min_stop_frac
+                else:
+                    assert spos - swid >= min_stop_frac, ValueError(
+                        f"stopper_position - stopper_width must be >= {min_stop_frac}"
+                    )
+            else:
+                if swid == -1:
+                    swid = max_stop_frac - spos
+                else:
+                    assert spos + swid <= max_stop_frac, ValueError(
+                        f"stopper_position + stopper_width must be <= {max_stop_frac}"
+                    )
             stopper_center = np.array(
                 (
                     width_stage / 2 + slen / 2,
