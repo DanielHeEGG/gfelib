@@ -55,7 +55,12 @@ def butterfly(
     beam = gl.flexure.beam(
         length=radius_outer
         - (radius_inner + width_inner)
-        + 2 * gl.utils.sagitta_offset_safe(radius_inner + width_inner, width_beam),
+        + 2
+        * gl.utils.sagitta_offset_safe(
+            radius_inner + width_inner,
+            width_beam,
+            angle_resolution,
+        ),
         width=width_beam,
         geometry_layer=geometry_layer,
         beam_spec=beam_spec,
