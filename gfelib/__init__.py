@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from gfelib import actuator
 from gfelib import basic
 from gfelib import datatypes
 from gfelib import flexure
