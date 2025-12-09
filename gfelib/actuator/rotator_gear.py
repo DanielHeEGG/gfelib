@@ -11,8 +11,8 @@ import gfelib as gl
 @gf.cell_with_module_name(check_instances=False)
 def rotator_gear(
     radius_inner: float,
+    radius_gap: float,
     radius_outer: float,
-    width_inner: float,
     teeth_pitch: float,
     teeth_width: float,
     teeth_height: float,
@@ -31,8 +31,8 @@ def rotator_gear(
 
     Args:
         radius_inner: inner carriage inner radius
+        radius_gap: rotor/stator gap midpoint radius
         radius_outer: outer carriage outer radius
-        width_inner: inner carriage width
         teeth_pitch: electrostatic teeth pitch (unit: degrees)
         teeth_width: electrostatic teeth width
         teeth_height: electrostatic teeth height
@@ -47,8 +47,8 @@ def rotator_gear(
     """
     c = gf.Component()
 
-    radius_teeth_inner = radius_inner + width_inner
-    radius_teeth_outer = radius_teeth_inner + 2 * teeth_height + teeth_clearance
+    radius_teeth_inner = radius_gap - (0.5 * teeth_clearance + teeth_height)
+    radius_teeth_outer = radius_gap + (0.5 * teeth_clearance + teeth_height)
     teeth_width_angle = teeth_width / radius_teeth_inner / (np.pi / 180)
 
     teeth_ring_overlap = gl.utils.sagitta_offset_safe(radius_teeth_inner, teeth_width)
@@ -65,8 +65,8 @@ def rotator_gear(
         stator_teeth_angles.append(phase_angles)
     stator_offset = -0.5 * angle_offset + 0.5 * teeth_pitch
 
-    rotor_radius = radius_inner + 0.5 * width_inner
-    rotor_width = width_inner
+    rotor_radius = 0.5 * (radius_inner + radius_teeth_inner)
+    rotor_width = radius_teeth_inner - radius_inner
     rotor_teeth_x = radius_teeth_inner + (0.5 * teeth_height - teeth_ring_overlap)
     stator_radius = 0.5 * (radius_teeth_outer + radius_outer)
     stator_width = radius_outer - radius_teeth_outer
