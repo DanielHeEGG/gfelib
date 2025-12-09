@@ -51,7 +51,9 @@ def rotator_gear(
     radius_teeth_outer = radius_gap + (0.5 * teeth_clearance + teeth_height)
     teeth_width_angle = teeth_width / radius_gap / (np.pi / 180)
 
-    teeth_ring_overlap = gl.utils.sagitta_offset_safe(radius_teeth_inner, teeth_width)
+    teeth_ring_overlap = gl.utils.sagitta_offset_safe(
+        radius_teeth_inner, teeth_width, angle_resolution
+    )
 
     stator_teeth_angles = []
     angle_offset = 0
