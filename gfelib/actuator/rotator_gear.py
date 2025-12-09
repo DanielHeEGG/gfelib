@@ -49,7 +49,7 @@ def rotator_gear(
 
     radius_teeth_inner = radius_gap - (0.5 * teeth_clearance + teeth_height)
     radius_teeth_outer = radius_gap + (0.5 * teeth_clearance + teeth_height)
-    teeth_width_angle = teeth_width / radius_teeth_inner / (np.pi / 180)
+    teeth_width_angle = teeth_width / radius_gap / (np.pi / 180)
 
     teeth_ring_overlap = gl.utils.sagitta_offset_safe(radius_teeth_inner, teeth_width)
 
