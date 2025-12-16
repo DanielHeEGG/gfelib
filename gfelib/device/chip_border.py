@@ -8,7 +8,7 @@ import gfelib as gl
 
 
 @gf.cell_with_module_name(check_instances=False)
-def border(
+def chip_border(
     size: gf.typings.Size,
     width: float,
     geometry_layer: gf.typings.LayerSpec,
