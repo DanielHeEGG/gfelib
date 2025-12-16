@@ -26,7 +26,7 @@ def beam(
     """
     c = gf.Component()
 
-    if not beam_spec.thickened:
+    if beam_spec is None or not beam_spec.thickened:
         _ = c << gf.components.rectangle(
             size=(length, width),
             layer=geometry_layer,
