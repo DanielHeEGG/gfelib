@@ -8,7 +8,7 @@ from collections.abc import Sequence
 import gfelib as gl
 
 
-@gf.cell_with_module_name(check_instances=False)
+@gl.utils.default_cell
 def rotator_gear(
     radius_inner: float,
     radius_gap: float,

@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name(check_instances=False)
+@gl.utils.default_cell
 def rectangle(
     size: gf.typings.Size,
     geometry_layer: gf.typings.LayerSpec,

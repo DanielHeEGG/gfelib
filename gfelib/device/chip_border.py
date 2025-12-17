@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name(check_instances=False)
+@gl.utils.default_cell
 def chip_border(
     size: gf.typings.Size,
     width: float,

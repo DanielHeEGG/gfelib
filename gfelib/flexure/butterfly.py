@@ -7,7 +7,7 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name(check_instances=False)
+@gl.utils.default_cell
 def butterfly(
     radius_inner: float,
     radius_outer: float,
