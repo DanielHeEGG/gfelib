@@ -67,15 +67,15 @@ def rotator_gear(
         stator_teeth_angles.append(phase_angles)
     stator_offset = -0.5 * angle_offset + 0.5 * teeth_pitch
 
-    rotor_radius = 0.5 * (radius_inner + radius_teeth_inner)
-    rotor_width = radius_teeth_inner - radius_inner
+    rotor_radius_i = radius_inner
+    rotor_radius_o = radius_teeth_inner
     rotor_teeth_x = radius_teeth_inner + (0.5 * teeth_height - teeth_ring_overlap)
-    stator_radius = 0.5 * (radius_teeth_outer + radius_outer)
-    stator_width = radius_outer - radius_teeth_outer
+    stator_radius_i = radius_teeth_outer
+    stator_radius_o = radius_outer
     stator_teeth_x = radius_teeth_outer - (0.5 * teeth_height - teeth_ring_overlap)
     if not inner_rotor:
-        rotor_radius, stator_radius = stator_radius, rotor_radius
-        rotor_width, stator_width = stator_width, rotor_width
+        rotor_radius_i, stator_radius_i = (stator_radius_i, rotor_radius_i)
+        rotor_radius_o, stator_radius_o = (stator_radius_o, rotor_radius_o)
         rotor_teeth_x, stator_teeth_x = stator_teeth_x, rotor_teeth_x
 
     teeth = gf.components.rectangle(
@@ -86,8 +86,8 @@ def rotator_gear(
 
     # rotor ring
     _ = c << gl.basic.ring(
-        radius=rotor_radius,
-        width=rotor_width,
+        radius_inner=rotor_radius_i,
+        radius_outer=rotor_radius_o,
         angles=(-0.5 * rotor_span, 0.5 * rotor_span),
         geometry_layer=geometry_layer,
         angle_resolution=angle_resolution,
@@ -110,8 +110,8 @@ def rotator_gear(
     for phase in stator_teeth_angles:
         # stator ring
         ring_ref = c << gl.basic.ring(
-            radius=stator_radius,
-            width=stator_width,
+            radius_inner=stator_radius_i,
+            radius_outer=stator_radius_o,
             angles=(
                 phase[0] - 0.5 * teeth_width_angle,
                 phase[-1] + 0.5 * teeth_width_angle,

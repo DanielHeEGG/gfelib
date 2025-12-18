@@ -9,9 +9,9 @@ import gfelib as gl
 
 @gl.utils.default_cell
 def butterfly(
-    radius_inner: float,
-    radius_outer: float,
-    width_inner: float,
+    radius0: float,
+    radius1: float,
+    radius2: float,
     width_beam: float,
     angles: tuple[float, float],
     release_inner: bool,
@@ -23,9 +23,9 @@ def butterfly(
     """Returns a half-butterfly joint (4 beams)
 
     Args:
-        radius_inner: inner carriage inner radius
-        radius_outer: joint outer radius
-        width_inner: inner carriage width
+        radius0: inner carriage inner radius
+        radius1: inner carriage outer radius
+        radius2: flexure outer radius
         width_beam: beam width
         angles: beam placement angles
         release_inner: `True` to release inner carriage
@@ -38,29 +38,22 @@ def butterfly(
 
     angles = sorted(angles)
 
-    angle_end = angles[1] + 0.5 * width_beam / (radius_inner + width_inner) / (
-        np.pi / 180
-    )
+    angle_end = angles[1] + 0.5 * width_beam / radius1 / (np.pi / 180)
 
     _ = c << gl.basic.ring(
-        radius=radius_inner + 0.5 * width_inner,
-        width=width_inner,
+        radius_inner=radius0,
+        radius_outer=radius1,
         angles=(-angle_end, angle_end),
         geometry_layer=geometry_layer,
         angle_resolution=angle_resolution,
         release_spec=release_spec if release_inner else None,
     )
 
-    beam_offset = 0.5 * (radius_outer + radius_inner + width_inner)
+    beam_offset = 0.5 * (radius1 + radius2)
     beam = gl.flexure.beam(
-        length=radius_outer
-        - (radius_inner + width_inner)
-        + 2
-        * gl.utils.sagitta_offset_safe(
-            radius_inner + width_inner,
-            width_beam,
-            angle_resolution,
-        ),
+        length=radius2
+        - radius1
+        + 2 * gl.utils.sagitta_offset_safe(radius1, width_beam, angle_resolution),
         width=width_beam,
         geometry_layer=geometry_layer,
         beam_spec=beam_spec,
