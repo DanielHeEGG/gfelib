@@ -12,19 +12,18 @@ def chip_border(
     size: gf.typings.Size,
     width: float,
     geometry_layer: gf.typings.LayerSpec,
+    handle_layer: gf.typings.LayerSpec | None,
     centered: bool,
     release_spec: gl.datatypes.ReleaseSpec | None,
-    cavity_spec: gl.datatypes.CavitySpec | None,
 ) -> gf.Component:
-    """Returns a released chip border
+    """Returns a released chip border, released chip final size will be `size - width`
 
     Args:
         size: chip outer width and height
         width: width of the border
         geometry_layer: rectangle polygon layer
+        handle_layer: handle polygon layer
         centered: `True` sets center to (0, 0), `False` sets south-west to (0, 0)
-        release_spec: release specifications, `None` for no release
-        cavity_spec: handle cavity specifications, `None` for no etch
     """
     c = gf.Component()
 
@@ -36,15 +35,16 @@ def chip_border(
         release_spec=release_spec,
     )
 
-    if cavity_spec is None:
+    if handle_layer is None:
         return c
 
-    _ = c << gl.basic.rectangle_ring(
-        size=(size[0] - width + cavity_spec.width, size[1] - width + cavity_spec.width),
-        width=cavity_spec.width,
-        geometry_layer=cavity_spec.layer,
+    ref = c << gl.basic.rectangle(
+        size=(size[0] - width, size[1] - width),
+        geometry_layer=handle_layer,
         centered=centered,
         release_spec=None,
     )
+    if not centered:
+        ref.move((0.5 * width, 0.5 * width))
 
     return c
