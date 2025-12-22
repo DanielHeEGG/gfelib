@@ -9,7 +9,7 @@ import gfelib as gl
 
 
 @gf.cell_with_module_name
-def zlever(
+def zpant_stopper(
     width_stage: float,
     length_stage: float,
     width_beam: float,

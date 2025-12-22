@@ -21,7 +21,8 @@ def zpant(
     cavity_length_offset: float = 0,
     release_specs: gl.datatypes.ReleaseSpec | None = None,
 ) -> gf.Component:
-    """Returns a pantographic Z joint (4 torsional beams), with handle layer generation options
+    """Returns a pantographic Z joint (4 torsional beams), with handle layer generation options.
+    The beams are constructed along X axis
 
     Args:
         width_stage: width of stage (X direction)
@@ -68,18 +69,29 @@ def zpant(
 
     # Generate four flexure beams
     beam_center_pos = np.array((width_stage / 2 + length_beam / 2, length_stage / 2))
-    beam = gl.flexure.beam_cavity(
+    beam = gl.flexure.beam(
         length=length_beam,
         width=width_beam,
         geometry_layer=geometry_layer,
-        cavity_layer=cavity_layer,
-        cavity_width=cavity_width,
-        cavity_length_offset=cavity_length_offset,
+        beam_spec=None,
+        release_spec=None,
     )
     (c << beam).move(tuple(np.array([1, 1]) * beam_center_pos))
     (c << beam).move(tuple(np.array([1, -1]) * beam_center_pos))
     (c << beam).move(tuple(np.array([-1, -1]) * beam_center_pos))
     (c << beam).move(tuple(np.array([-1, 1]) * beam_center_pos))
+
+    if cavity_layer:
+
+        beamCavity = gf.components.rectangle(
+            size=(length_beam + cavity_length_offset, cavity_width),
+            layer=cavity_layer,
+            centered=True,
+        )
+        (c << beamCavity).move(tuple(np.array([1, 1]) * beam_center_pos))
+        (c << beamCavity).move(tuple(np.array([1, -1]) * beam_center_pos))
+        (c << beamCavity).move(tuple(np.array([-1, -1]) * beam_center_pos))
+        (c << beamCavity).move(tuple(np.array([-1, 1]) * beam_center_pos))
 
     c.flatten()
 
