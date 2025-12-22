@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
-from gfelib import basic
 from gfelib import datatypes
-from gfelib import flexure
-from gfelib import mega
 from gfelib import utils
+
+from gfelib import basic
+
+from gfelib import flexure
+from gfelib import actuator
+
+from gfelib import device

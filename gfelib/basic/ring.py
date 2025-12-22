@@ -7,10 +7,10 @@ import numpy as np
 import gfelib as gl
 
 
-@gf.cell_with_module_name(check_instances=False)
+@gl.utils.default_cell
 def ring(
-    radius: float,
-    width: float,
+    radius_inner: float,
+    radius_outer: float,
     angles: tuple[float, float],
     geometry_layer: gf.typings.LayerSpec,
     angle_resolution: float,
@@ -19,8 +19,8 @@ def ring(
     """Returns a ring with release holes
 
     Args:
-        radius: ring midpoint radius (midpoint between inner and outer radii)
-        width: ring width
+        radius_inner: ring inner radius
+        radius_outer: ring outer radius
         angles: ring start and end angles
         geometry_layer: ring polygon layer
         angle_resolution: degrees per point for circular geometries
@@ -32,9 +32,11 @@ def ring(
     span += 360 if span < 0 else 0
     span = 360 if span > 360 else span
 
+    width = radius_outer - radius_inner
+
     ring_ref = c << gf.components.ring(
-        radius=radius,
-        width=width,
+        radius=0.5 * (radius_inner + radius_outer),
+        width=radius_outer - radius_inner,
         angle=span,
         layer=geometry_layer,
         angle_resolution=angle_resolution,
@@ -48,16 +50,16 @@ def ring(
         return c
 
     if (
-        radius <= release_spec.distance
+        radius_outer <= release_spec.distance
         or width <= release_spec.distance
-        or span * np.pi / 180 * radius <= release_spec.distance
+        or span * np.pi / 180 * radius_outer <= release_spec.distance
     ):
         return c
 
     s = 2 * (release_spec.hole_radius + release_spec.distance) / np.sqrt(2)
     sr = width / (width // s + 1)
 
-    for r in np.arange(radius - 0.5 * width + 0.5 * sr, radius + 0.5 * width, sr):
+    for r in np.arange(radius_inner + 0.5 * sr, radius_outer, sr):
         steps = span * np.pi / 180 * r // s + 1
         dt = span / 180 * np.pi / steps
         t = np.arange(0.5 * dt, span / 180 * np.pi + dt, dt)
