@@ -26,6 +26,17 @@ def beam(
     """
     c = gf.Component()
 
+    if beam_spec is not None and beam_spec.handle_etched:
+        handle_rect = c << gf.components.rectangle(
+            size=(
+                beam_spec.get_handle_etch_length(length),
+                beam_spec.get_handle_etch_width(width),
+            ),
+            layer=beam_spec.handle_etch_layer,
+            centered=True,
+        )
+        handle_rect.movex(beam_spec.get_handle_etch_offset(length))
+
     if beam_spec is None or not beam_spec.thickened:
         _ = c << gf.components.rectangle(
             size=(length, width),
