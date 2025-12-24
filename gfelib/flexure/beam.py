@@ -15,7 +15,7 @@ def beam(
 ) -> gf.Component:
     """Returns a complex beam, centered at (0, 0)
 
-    **Warning**: release holes are never added to thin sections of the beam, regardless of dimensions
+    **Warning**: if beam_spec is not specified, release holes are never added to the beam, regardless of dimensions
 
     Args:
         length: beam length (x)
@@ -26,22 +26,33 @@ def beam(
     """
     c = gf.Component()
 
-    if beam_spec is not None and beam_spec.handle_etched:
-        handle_rect = c << gf.components.rectangle(
+    if beam_spec is None:
+        _ = c << gl.basic.rectangle(
+            size=(length, width),
+            geometry_layer=geometry_layer,
+            centered=True,
+            release_spec=None,
+        )
+        return c
+
+    if beam_spec.handle_etched:
+        handle_rect = c << gl.basic.rectangle(
             size=(
                 beam_spec.get_handle_etch_length(length),
                 beam_spec.get_handle_etch_width(width),
             ),
-            layer=beam_spec.handle_etch_layer,
+            geometry_layer=beam_spec.handle_etch_layer,
             centered=True,
+            release_spec=None,
         )
         handle_rect.movex(beam_spec.get_handle_etch_offset(length))
 
-    if beam_spec is None or not beam_spec.thickened:
-        _ = c << gf.components.rectangle(
+    if not beam_spec.thickened:
+        _ = c << gl.basic.rectangle(
             size=(length, width),
-            layer=geometry_layer,
+            geometry_layer=geometry_layer,
             centered=True,
+            release_spec=release_spec if beam_spec.release_thin else None,
         )
         return c
 
@@ -56,21 +67,23 @@ def beam(
         size=(thick_length, thick_width),
         geometry_layer=geometry_layer,
         centered=True,
-        release_spec=release_spec,
+        release_spec=release_spec if beam_spec.release_thick else None,
     )
     rect_thick_ref.movex(thick_offset)
 
-    rect_thin1_ref = c << gf.components.rectangle(
+    rect_thin1_ref = c << gl.basic.rectangle(
         size=(thin_length + thick_offset, width),
-        layer=geometry_layer,
+        geometry_layer=geometry_layer,
         centered=True,
+        release_spec=release_spec if beam_spec.release_thin else None,
     )
     rect_thin1_ref.movex(-thin_center + 0.5 * thick_offset)
 
-    rect_thin2_ref = c << gf.components.rectangle(
+    rect_thin2_ref = c << gl.basic.rectangle(
         size=(thin_length - thick_offset, width),
-        layer=geometry_layer,
+        geometry_layer=geometry_layer,
         centered=True,
+        release_spec=release_spec if beam_spec.release_thin else None,
     )
     rect_thin2_ref.movex(thin_center + 0.5 * thick_offset)
 

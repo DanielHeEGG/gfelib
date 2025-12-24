@@ -11,6 +11,8 @@ class BeamSpec(pydantic.BaseModel):
     - thicker mid-section of the beam
 
     Parameters:
+        release_thin: `True` to place release holes on thin beam sections
+        release_thick: `True` to place release holes on thick beam sections
         thick_length: mid-section length, in the form (abs, rel) -> abs + beam_length * rel
         thick_width: mid-section width, in the form (abs, rel) -> abs + beam_width * rel
         thick_offset: mid-section center offset in the lengthwise direction, in the form (abs, rel) -> abs + beam_length * rel
@@ -21,6 +23,9 @@ class BeamSpec(pydantic.BaseModel):
     """
 
     model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
+
+    release_thin: float = False
+    release_thick: float = False
 
     thick_length: tuple[float, float] = (0, 0)
     thick_width: tuple[float, float] = (0, 0)
