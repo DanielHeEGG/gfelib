@@ -53,7 +53,7 @@ class BeamSpec(pydantic.BaseModel):
     def get_thick_width(self, beam_width: float) -> float:
         x = self.thick_width[0] + self.thick_width[1] * beam_width
         if x <= 0:
-            raise ValueError("Thickened mid-section must have length > 0")
+            raise ValueError("Thickened mid-section must have width > 0")
         return x
 
     def get_thick_offset(self, beam_length: float) -> float:
@@ -72,13 +72,13 @@ class BeamSpec(pydantic.BaseModel):
     def get_handle_etch_length(self, beam_length: float) -> float:
         x = self.handle_etch_length[0] + self.handle_etch_length[1] * beam_length
         if x <= 0:
-            raise ValueError("Thickened mid-section must have length > 0")
+            raise ValueError("Handle etch rectangle must have length > 0")
         return x
 
     def get_handle_etch_width(self, beam_width: float) -> float:
         x = self.handle_etch_width[0] + self.handle_etch_width[1] * beam_width
         if x <= 0:
-            raise ValueError("Thickened mid-section must have length > 0")
+            raise ValueError("Handle etch rectangle must have width > 0")
         return x
 
     def get_handle_etch_offset(self, beam_length: float) -> float:
