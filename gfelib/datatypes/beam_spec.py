@@ -61,9 +61,9 @@ class BeamSpec(pydantic.BaseModel):
 
     @property
     def handle_etched(self) -> bool:
-        if self.thick_length[0] == 0 and self.thick_length[1] <= 0:
+        if self.handle_etch_length[0] == 0 and self.handle_etch_length[1] <= 0:
             return False
-        if self.thick_width[0] == 0 and self.thick_width[1] <= 0:
+        if self.handle_etch_width[0] == 0 and self.handle_etch_width[1] <= 0:
             return False
         if self.handle_etch_layer is None:
             return False
