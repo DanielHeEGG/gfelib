@@ -97,7 +97,18 @@ def z_cantilever_half(
     handle_layer: gf.typings.LayerSpec | None,
     release_spec: gl.datatypes.ReleaseSpec | None,
 ) -> gf.Component:
+    """Returns a half-z-cantilever with arbitrary beams
 
+    Args:
+        length: cantilever body length (x)
+        length: cantilever body width (y)
+        beams: list of beams to place
+        clearance: electrical isolation distance
+        middle_split: `True` to split top and bottom half
+        geometry_layer: cantilever polygon layer
+        handle_layer: handle polygon layer
+        release_spec: release specifications, `None` for no release
+    """
     c = gf.Component()
 
     y_offset = 0.5 * clearance if middle_split else 0
