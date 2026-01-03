@@ -21,6 +21,6 @@ def sagitta_offset_safe(
 
     # term1 accounts for circles approximated by a polygon
     # The exact offset is `radius * (1 - np.cos(angular_resolution * np.pi / 180 / 2))`, this term is guaranteed to overestimate
-    term1 = radius * (angle_resolution * np.pi / 180) ** 2 / 8
+    term1 = radius * (angle_resolution * np.pi / 180) / 8
 
     return term0 + term1
