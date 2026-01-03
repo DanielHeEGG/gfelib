@@ -69,10 +69,10 @@ def rotator_gear(
 
     rotor_radius_i = radius_inner
     rotor_radius_o = radius_teeth_inner
-    rotor_teeth_x = radius_teeth_inner + (0.5 * teeth_height - teeth_ring_overlap)
+    rotor_teeth_x = radius_teeth_inner + 0.5 * (teeth_height - teeth_ring_overlap)
     stator_radius_i = radius_teeth_outer
     stator_radius_o = radius_outer
-    stator_teeth_x = radius_teeth_outer - (0.5 * teeth_height - teeth_ring_overlap)
+    stator_teeth_x = radius_teeth_outer - 0.5 * (teeth_height - teeth_ring_overlap)
     if not inner_rotor:
         rotor_radius_i, stator_radius_i = (stator_radius_i, rotor_radius_i)
         rotor_radius_o, stator_radius_o = (stator_radius_o, rotor_radius_o)
