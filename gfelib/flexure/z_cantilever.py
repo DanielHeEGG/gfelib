@@ -14,7 +14,7 @@ class ZCantileverBeam(pydantic.BaseModel):
     Parameters:
         length: beam length (y)
         width: beam width (x)
-        position: beam x position, in the form (abs, rel) -> abs + z_cantilever.length * rel
+        position: beam center x position, in the form (abs, rel) -> abs + z_cantilever.length * rel
         inset_x: beam inset region x-size, in the form (abs, rel) -> abs + z_cantilever.length * rel
         inset_y: beam inset region y-size, in the form (abs, rel) -> abs + z_cantilever.width * rel
         isolation_x: cantilever beam electrical isolation region x-size, in the form (abs, rel) -> abs + z_cantilever.length * rel, set to (0, 0) to disable isolation
@@ -35,10 +35,10 @@ class ZCantileverBeam(pydantic.BaseModel):
 
     def get_position(self, cantilever_length: float) -> float:
         x = self.position[0] + self.position[1] * cantilever_length
-        if x < 0:
-            raise ValueError("Beam must have position >= 0")
-        if x > cantilever_length - self.width:
-            raise ValueError("Beam must have position <= cantilever_length - width")
+        if x < 0.5 * self.width:
+            raise ValueError(f"Beam must have position >= 0.5 * width")
+        if x > cantilever_length - 0.5 * self.width:
+            raise ValueError("Beam must have position <= cant_length - 0.5 * width")
         return x
 
     @property
@@ -128,10 +128,10 @@ def z_cantilever_half(
             isolation_x = beam.get_isolation_x(length)
             isolation_y = beam.get_isolation_y(width)
 
-            isolation_region_s = position + 0.5 * beam.width - 0.5 * isolation_x
+            isolation_region_s = position - 0.5 * isolation_x
             isolation_region_s = 0 if isolation_region_s < 0 else isolation_region_s
 
-            isolation_region_e = position + 0.5 * beam.width + 0.5 * isolation_x
+            isolation_region_e = position + 0.5 * isolation_x
             isolation_region_e = (
                 length if isolation_region_e > length else isolation_region_e
             )
@@ -170,10 +170,10 @@ def z_cantilever_half(
             inset_x = beam.get_inset_x(length)
             inset_y = beam.get_inset_y(width)
 
-            inset_region_s = position + 0.5 * beam.width - 0.5 * inset_x
+            inset_region_s = position - 0.5 * inset_x
             inset_region_s = 0 if inset_region_s < 0 else inset_region_s
 
-            inset_region_e = position + 0.5 * beam.width + 0.5 * inset_x
+            inset_region_e = position + 0.5 * inset_x
             inset_region_e = length if inset_region_e > length else inset_region_e
 
             inset_region = gf.Component()
@@ -208,7 +208,7 @@ def z_cantilever_half(
         ref.rotate(angle=90, center=(0, 0))
         ref.move(
             (
-                0.5 * beam.width + position,
+                position,
                 0.5 * width + 0.5 * beam.length - inset,
             )
         )
