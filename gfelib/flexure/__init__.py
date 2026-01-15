@@ -7,3 +7,4 @@ from gfelib.flexure.z_cantilever import (
     z_cantilever_half,
     z_cantilever_asymm,
 )
+from gfelib.flexure.parallel_flexure import parallel_flexure
