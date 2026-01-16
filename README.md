@@ -7,7 +7,7 @@ A collection of reusable components for [gdsfactory](https://github.com/gdsfacto
 $ cd your/project/directory
 
 # add this repository as a git submodule
-$ git submodule add https://github.com/DanielHeEGG/gfelib libs/gfelib
+$ git submodule add https://github.com/Cao-RQM-Lab/gfelib libs/gfelib
 
 # install the library
 $ pip install -e lib/gfelib
