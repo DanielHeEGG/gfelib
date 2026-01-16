@@ -20,6 +20,7 @@ class ZCantileverBeam(pydantic.BaseModel):
         isolation_x: cantilever beam electrical isolation region x-size, in the form (abs, rel) -> abs + z_cantilever.length * rel, set to (0, 0) to disable isolation
         isolation_y: cantilever beam electrical isolation region y-size, in the form (abs, rel) -> abs + z_cantilever.width * rel, set to (0, 0) to disable isolation
         spec: beam specifications
+        flip_side: for asymmetric cantilevers, set this to True will move this beam to the other side
     """
 
     model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
@@ -32,6 +33,7 @@ class ZCantileverBeam(pydantic.BaseModel):
     isolation_x: tuple[float, float]
     isolation_y: tuple[float, float]
     spec: gl.datatypes.BeamSpec | None
+    flip_side: bool = False
 
     def get_position(self, cantilever_length: float) -> float:
         x = self.position[0] + self.position[1] * cantilever_length
@@ -215,6 +217,146 @@ def z_cantilever_half(
 
     _ = c << gf.components.rectangle(
         size=(length, 0.5 * width),
+        layer=handle_layer,
+        centered=False,
+    )
+
+    return c
+
+
+@gl.utils.default_cell
+def z_cantilever_asymm(
+    length: float,
+    width: float,
+    beams: Sequence[ZCantileverBeam],
+    clearance: float,
+    geometry_layer: gf.typings.LayerSpec,
+    handle_layer: gf.typings.LayerSpec | None,
+    release_spec: gl.datatypes.ReleaseSpec | None,
+) -> gf.Component:
+    """Returns an asymmetric cantilever with arbitrary beams
+
+    Args:
+        length: cantilever body length (x)
+        length: cantilever body width (y)
+        beams: list of beams to place
+        clearance: electrical isolation distance
+        geometry_layer: cantilever polygon layer
+        handle_layer: handle polygon layer
+        release_spec: release specifications, `None` for no release
+    """
+    c = gf.Component()
+
+    rect_ref = c << gf.components.rectangle(
+        size=(length, width),
+        layer=geometry_layer,
+        centered=False,
+    )
+
+    beams.sort(key=lambda x: x.get_position(length))
+
+    for beam in beams:
+        position = beam.get_position(length)
+        flip_side = beam.flip_side
+
+        if beam.isolated:
+            isolation_x = beam.get_isolation_x(length)
+            isolation_y = beam.get_isolation_y(width)
+
+            isolation_region_s = position - 0.5 * isolation_x
+            isolation_region_s = 0 if isolation_region_s < 0 else isolation_region_s
+
+            isolation_region_e = position + 0.5 * isolation_x
+            isolation_region_e = (
+                length if isolation_region_e > length else isolation_region_e
+            )
+
+            isolation_region = gf.Component()
+            isolation_region_ref = isolation_region << gf.components.rectangle(
+                size=(isolation_region_e - isolation_region_s, isolation_y),
+                layer=geometry_layer,
+                centered=False,
+            )
+            isolation_region_ref.move((isolation_region_s, width - isolation_y))
+            if flip_side:
+                isolation_region_ref.mirror_y(0.5 * width)
+            isolation_region.flatten()
+
+            isolation_expand = isolation_region.copy()
+            isolation_expand.offset(layer=geometry_layer, distance=clearance)
+
+            c = gf.boolean(
+                A=c,
+                B=isolation_expand,
+                operation="-",
+                layer=geometry_layer,
+                layer1=geometry_layer,
+                layer2=geometry_layer,
+            )
+
+            c = gf.boolean(
+                A=c,
+                B=isolation_region,
+                operation="|",
+                layer=geometry_layer,
+                layer1=geometry_layer,
+                layer2=geometry_layer,
+            )
+
+        if beam.insetted:
+            inset_x = beam.get_inset_x(length)
+            inset_y = beam.get_inset_y(width)
+
+            inset_region_s = position - 0.5 * inset_x
+            inset_region_s = 0 if inset_region_s < 0 else inset_region_s
+
+            inset_region_e = position + 0.5 * inset_x
+            inset_region_e = length if inset_region_e > length else inset_region_e
+
+            inset_region = gf.Component()
+            inset_region_ref = inset_region << gf.components.rectangle(
+                size=(inset_region_e - inset_region_s, inset_y),
+                layer=geometry_layer,
+                centered=False,
+            )
+            inset_region_ref.move((inset_region_s, width - inset_y))
+            if flip_side:
+                inset_region_ref.mirror_y(0.5 * width)
+            inset_region.flatten()
+
+            c = gf.boolean(
+                A=c,
+                B=inset_region,
+                operation="-",
+                layer=geometry_layer,
+                layer1=geometry_layer,
+                layer2=geometry_layer,
+            )
+
+    for beam in beams:
+        position = beam.get_position(length)
+        flip_side = beam.flip_side
+        inset = beam.get_inset_y(width) if beam.insetted else 0
+
+        ref = c << gl.flexure.beam(
+            length=beam.length,
+            width=beam.width,
+            geometry_layer=geometry_layer,
+            beam_spec=beam.spec,
+            release_spec=release_spec,
+        )
+        ref.rotate(angle=90, center=(0, 0))
+        ref.move(
+            (
+                position,
+                width + 0.5 * beam.length - inset,
+            )
+        )
+        if flip_side:
+            ref.mirror_y(0.5 * width)
+
+    _ = c << gf.components.rectangle(
+        size=(length, width),
         layer=handle_layer,
         centered=False,
     )
