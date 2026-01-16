@@ -17,10 +17,9 @@ def comb(
     comb_count: int,
     comb_overlap: float,
     geometry_layer: gf.typings.LayerSpec,
-    # release_spec=None,
 ) -> gf.Component:
     """
-    Generates an angular comb structure composed of concentric arc fingers.
+    Generates a comb structure composed of fingers.
 
     Parameters
     ----------
@@ -36,8 +35,6 @@ def comb(
         x overlap between the fingers
     geometry_layer : LayerSpec
         GDS layer for geometry.
-    release_spec : unused
-        Reserved for future use.
 
     Returns
     -------

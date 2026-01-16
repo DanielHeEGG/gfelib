@@ -19,7 +19,6 @@ def angular_comb(
     comb_overlap_angle: float,
     geometry_layer: gf.typings.LayerSpec,
     angle_resolution: float,
-    # release_spec=None,
 ) -> gf.Component:
     """
     Generates an angular comb structure composed of concentric arc fingers.
@@ -42,8 +41,6 @@ def angular_comb(
         GDS layer for geometry.
     angle_resolution : float
         Angular discretization in degrees (passed to ring).
-    release_spec : unused
-        Reserved for future use.
 
     Returns
     -------
